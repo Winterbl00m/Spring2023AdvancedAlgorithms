@@ -125,5 +125,19 @@ class BBTreeNode():
 
         #TODO:
         # Implement your solution here!
+        while heap: 
+            _, _, node = hq.heappop(heap)
+            if not node.is_integral():
+                for var in node.vars:
+                    if not var.is_integer():
+                        n1 = branch_floor(var)
+                        n2 = branch_ceil(var) 
+
+                        hq.heappush(heap, (bestres, next(counter), n1))
+                        hq.heappush(heap, (bestres, next(counter), n2))
+            else:
+                if node.objective.value >= bestres:
+                    bestres = node.objective.value
+                    bestnode_vars = [v.value for v in node.vars]
 
         return bestres, bestnode_vars
