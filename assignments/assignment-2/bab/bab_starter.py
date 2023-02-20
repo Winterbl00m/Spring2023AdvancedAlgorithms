@@ -127,17 +127,22 @@ class BBTreeNode():
         # Implement your solution here!
         while heap: 
             _, _, node = hq.heappop(heap)
-            if not node.is_integral():
-                for var in node.vars:
-                    if not var.is_integer():
-                        n1 = branch_floor(var)
-                        n2 = branch_ceil(var) 
+            try: 
+                new_res = node.prob.solve(solver='cvxopt')
+                if not node.is_integral():
+                    for v in node.vars:
+                        if abs(round(v.value) - float(v.value)) > 1e-4:
+                            n1 = node.branch_floor(v)
+                            n2 = node.branch_ceil(v) 
 
-                        hq.heappush(heap, (bestres, next(counter), n1))
-                        hq.heappush(heap, (bestres, next(counter), n2))
-            else:
-                if node.objective.value >= bestres:
-                    bestres = node.objective.value
-                    bestnode_vars = [v.value for v in node.vars]
+                            hq.heappush(heap, (bestres, next(counter), n1))
+                            hq.heappush(heap, (bestres, next(counter), n2))
+                else:
+                    if node.objective.value >= bestres:
+                        bestres = node.objective.value 
+                        bestnode_vars = [v.value for v in node.vars]
+
+            except:
+                pass
 
         return bestres, bestnode_vars
